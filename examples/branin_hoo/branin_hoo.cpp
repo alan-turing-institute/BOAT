@@ -1,6 +1,5 @@
 #include "boat.hpp"
 
-
 using namespace std;
 
 using boat::ProbEngine;
@@ -262,4 +261,3 @@ int main() {
   //bo_struct_optim();
   bo_struct_optim_efficient();
 }
-
