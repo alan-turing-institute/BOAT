@@ -11,6 +11,9 @@ latex/
 # compiled BOAT
 build/
 
+*.dSYM
+
 #examples compiled 
+bo_struct_opti
 examples/branin_hoo/branin_hoo
 bo_naive_opti
