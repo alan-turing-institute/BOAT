@@ -4,7 +4,7 @@ project(BOAT)
 
 set(CMAKE_C_COMPILER gcc-8)
 set(CMAKE_CXX_COMPILER g++-8)
-set(CMAKE_CXX_FLAGS "-Wall -fexceptions -std=c++14 -O3 -fopenmp")
+set(CMAKE_CXX_FLAGS "-Wall -fexceptions -std=c++14 -O3 -fopenmp -g")
 include_directories(SYSTEM $ENV{EIGEN_DIR} /usr/local/include)
 
 add_subdirectory(optimization)
