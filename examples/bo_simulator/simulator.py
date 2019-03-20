@@ -68,8 +68,6 @@ def create_header_from_template(params, header_path, sim_output_dir, template_pa
 
 if __name__ == "__main__":
 
-    # BOAT/examples/bo_simulator
-
     # temporary parameters
     _PARAMS = {
         'cache_line_sz': 64,
@@ -98,16 +96,16 @@ if __name__ == "__main__":
     create_header_from_template(_PARAMS, _HEADER_PATH, _SIM_OUTPUT_DIR)
 
     # Generating design sweeps using the script provided with gem5
-    
-    # # gem5 generate_design_sweeps.py needs to be executed in the `gem5-aladdin/sweeps` directory
-    # _CWD = os.getcwd()
-    # os.chdir(_GEM5_SWEEPS_PATH)
+    # It seems that gem5 generate_design_sweeps.py needs to be executed in the `gem5-aladdin/sweeps` directory.
+    # TODO: check above
+    _CWD = os.getcwd()
+    os.chdir(_GEM5_SWEEPS_PATH)
 
     # TODO: python2 needs to be python?
     os.system('python2 %s %s' % (_GEM5_SWEEPS_DESIGN_PY_PATH, 
                                  os.path.join(_GEM5_BENCH_DIR_NAME, _HEADER_FILE_NAME)))
 
-    # os.chdir(_CWD)
+    os.chdir(_CWD)
 
     # removing the temporary header file
     if os.path.exists(_HEADER_PATH):
