@@ -68,6 +68,8 @@ def create_header_from_template(params, header_path, sim_output_dir, template_pa
 
 if __name__ == "__main__":
 
+    # BOAT/examples/bo_simulator
+
     # temporary parameters
     _PARAMS = {
         'cache_line_sz': 64,
@@ -77,11 +79,13 @@ if __name__ == "__main__":
 
     _GEM5_BENCH_DIR_NAME = 'benchmarks'
     _GEM5_SWEEPS_DIR_NAME = 'sweeps'
+    _GEM5_SWEEPS_DESIGN_PY = 'generate_design_sweeps.py'
 
     # get the paths to aladdin and its submodules
     _GEM5_PATH = os.path.join(os.environ['ALADDIN_HOME'], '..', '..')
 
     _GEM5_SWEEPS_PATH = os.path.join(_GEM5_PATH, _GEM5_SWEEPS_DIR_NAME)
+    _GEM5_SWEEPS_DESIGN_PY_PATH = os.path.join(_GEM5_SWEEPS_PATH, _GEM5_SWEEPS_DESIGN_PY)
     _GEM5_SWEEPS_BENCH_PATH = os.path.join(_GEM5_SWEEPS_PATH, _GEM5_BENCH_DIR_NAME)
 
     # template file
@@ -99,8 +103,8 @@ if __name__ == "__main__":
     os.chdir(_GEM5_SWEEPS_PATH)
 
     # TODO: python2 needs to be python?
-    os.system('python2 generate_design_sweeps.py %s' % (os.path.join(_GEM5_BENCH_DIR_NAME,
-                                                                     _HEADER_FILE_NAME)))
+    os.system('python2 %s %s' % (_GEM5_SWEEPS_DESIGN_PY_PATH, 
+                                 os.path.join(_GEM5_BENCH_DIR_NAME, _HEADER_FILE_NAME)))
 
     os.chdir(_CWD)
 
@@ -108,11 +112,12 @@ if __name__ == "__main__":
     if os.path.exists(_HEADER_PATH):
         os.remove(_HEADER_PATH)
 
-
-    # _HEADER_PATH
-
     # Executing the simulator
 
-    # Gathering the results
+
+
+    # Collecting results
+
+    
 
     print('Finished.')
