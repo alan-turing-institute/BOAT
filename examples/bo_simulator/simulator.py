@@ -75,8 +75,6 @@ if __name__ == "__main__":
         'cache_queue_size': 64
     }
 
-    # 
-
     _GEM5_BENCH_DIR_NAME = 'benchmarks'
     _GEM5_SWEEPS_DIR_NAME = 'sweeps'
 
@@ -90,7 +88,7 @@ if __name__ == "__main__":
     _HEADER_FILE_NAME = str(uuid.uuid4())
     _HEADER_PATH = os.path.join(_GEM5_SWEEPS_BENCH_PATH, _HEADER_FILE_NAME)
 
-    _SIM_OUTPUT_DIR = os.getcwd()
+    _SIM_OUTPUT_DIR = os.path.join(_GEM5_SWEEPS_PATH, 'tla_temp')
 
     # Preparing input input file for the simulator
     create_header_from_template(_PARAMS, _HEADER_PATH, _SIM_OUTPUT_DIR)
@@ -105,6 +103,13 @@ if __name__ == "__main__":
                                                                      _HEADER_FILE_NAME)))
 
     os.chdir(_CWD)
+
+    # removing the temporary header file
+    if os.path.exists(_HEADER_PATH):
+        os.remove(_HEADER_PATH)
+
+
+    # _HEADER_PATH
 
     # Executing the simulator
 
