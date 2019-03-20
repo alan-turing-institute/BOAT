@@ -58,7 +58,7 @@ def create_header_from_template(params, header_path, sim_output_dir, template_pa
     # Check which parameters match with available parameters and add those values to the header file
     params_src = ''
     for key in set(_AVAILABLE_PARAMS).intersection(params):
-        params_src = 'set %s%s %s\n' % (params_src, key, params[key])
+        params_src = '%s set %s %s\n' % (params_src, key, params[key])
 
     out_src = out_src.replace('# Insert here\n', params_src)
 
