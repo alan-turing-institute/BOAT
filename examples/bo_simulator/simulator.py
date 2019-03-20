@@ -79,7 +79,8 @@ if __name__ == "__main__":
     _GEM5_SWEEPS_DIR_NAME = 'sweeps'
 
     # get the paths to aladdin and its submodules
-    _GEM5_PATH = os.environ['ALADDIN_HOME']
+    _GEM5_PATH = os.path.join(os.environ['ALADDIN_HOME'], '..', '..')
+
     _GEM5_SWEEPS_PATH = os.path.join(_GEM5_PATH, _GEM5_SWEEPS_DIR_NAME)
     _GEM5_SWEEPS_BENCH_PATH = os.path.join(_GEM5_SWEEPS_PATH, _GEM5_BENCH_DIR_NAME)
 
