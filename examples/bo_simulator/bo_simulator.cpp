@@ -2,28 +2,48 @@
 
 using namespace std;
 
+using boat::RangeParameter;
+using boat::GPParams;
 using boat::ProbEngine;
 using boat::SemiParametricModel;
 using boat::DAGModel;
-using boat::GPParams;
 using boat::NLOpt;
 using boat::BayesOpt;
-using boat::SimpleOpt;
 using boat::generator;
-using boat::RangeParameter;
 
+// Parameters for the model
 struct AladdinParams{
-  AladdinParams() : cycle_time_(1, 6),
-    pipelining_(0, 1){} // vector of values
+  AladdinParams() :
+    cycle_time_(1, 6),
+    cache_bandwidth_(4, 17){} // needs to be checked if this is the correct syntax
+
   RangeParameter<double> cycle_time_;
-  CategoricalParameter<int> pipelining_;
+  RangeParameter<double> cache_bandwidth_;
 };
 
 // Objective function
+// At the moment this is very ugly implementatio but just to get it working.
+// TODO: implement in a more efficient fasion
 double run_simulator(const AladdinParams &p) {
+
+  std::string command = "python ",
+              python_file = "simulator.py";
+
+  double result = 0.0;
+
+
   // create a new input file
+
+  command += "";
+
   // run run_simulator
+  system(command.c_str());
+
   // retrieve result
+
+  // delete input and output files
+
+
   return result;
 }
 
@@ -32,7 +52,7 @@ struct Param : public SemiParametricModel<Param> {
   Param() {
     p_.default_noise(0.0);
 
-    // replace with plausible range for the prior
+    // Ranges require updating with more realistic values from the results
     p_.mean(uniform_real_distribution<>(0.0, 100.0)(generator));
     p_.stdev(uniform_real_distribution<>(0.0, 200.0)(generator));
 
@@ -56,7 +76,7 @@ struct FullModel : public DAGModel<FullModel> {
 
   // registers objective under graph
   void model(const AladdinParams& p) {
-    output("objective", eng_, p.cycle_time_.value(), p.pipelining_.value());
+    output("objective", eng_, p.cycle_time_.value(), p.cache_bandwidth_.value());
   }
 
   void print() {
@@ -68,11 +88,10 @@ struct FullModel : public DAGModel<FullModel> {
   ProbEngine<Param> eng_;
 };
 
-
 // what is the next point we should test
 // incumbent - best current example
 void maximize_ei(FullModel& m, AladdinParams& p, double incumbent) {
-  NLOpt<> opt(p.x1_, p.x2_);
+  NLOpt<> opt(p.cycle_time_, p.cache_bandwidth_);
 
   // finds high uncertainty points
   // r - expected improvement
@@ -91,7 +110,7 @@ void bo_naive_optim() {
   FullModel m;
   m.set_num_particles(100);
 
-  BHParams p;
+  AladdinParams p;
   BayesOpt<unordered_map<string, double> > opt;
 
   auto subopt = [&]() {
@@ -101,10 +120,9 @@ void bo_naive_optim() {
   auto util = [&](){
     unordered_map<string, double> res;
 
-    //
-    res["objective"] = branin_hoo(p);
+    res["objective"] = run_simulator(p);
 
-    PR(p.x1_.value(), p.x2_.value(), res["objective"]);
+    PR(p.cycle_time_.value(), p.cache_bandwidth_.value(), res["objective"]);
     return res;
   };
 
