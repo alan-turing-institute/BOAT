@@ -12,11 +12,9 @@ generate configs
 # Set parameters.
 set output_dir "$OUTPUT_DIR"
 set source_dir "../src/aladdin/MachSuite"
-set simulator "gem5-cpu"
+set simulator "gem5-cache"
 set memory_type "cache"
 
 # Insert here
-
-source "machsuite_constants.xe"
 
 end single

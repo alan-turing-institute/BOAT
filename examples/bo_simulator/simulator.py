@@ -58,7 +58,7 @@ def create_header_from_template(params, header_path, sim_output_dir, template_pa
     # Check which parameters match with available parameters and add those values to the header file
     params_src = ''
     for key in set(_AVAILABLE_PARAMS).intersection(params):
-        params_src = '%s%s %s\n' % (params_src, key, params[key])
+        params_src = 'set %s%s %s\n' % (params_src, key, params[key])
 
     out_src = out_src.replace('# Insert here\n', params_src)
 
@@ -75,6 +75,8 @@ if __name__ == "__main__":
         'cache_queue_size': 64
     }
 
+    # 
+
     _GEM5_BENCH_DIR_NAME = 'benchmarks'
     _GEM5_SWEEPS_DIR_NAME = 'sweeps'
 
@@ -88,7 +90,7 @@ if __name__ == "__main__":
     _HEADER_FILE_NAME = str(uuid.uuid4())
     _HEADER_PATH = os.path.join(_GEM5_SWEEPS_BENCH_PATH, _HEADER_FILE_NAME)
 
-    _SIM_OUTPUT_DIR = '/Users/tlazauskas/git/Turing/BOAT/examples/bo_simulator'
+    _SIM_OUTPUT_DIR = os.getcwd()
 
     # Preparing input input file for the simulator
     create_header_from_template(_PARAMS, _HEADER_PATH, _SIM_OUTPUT_DIR)
