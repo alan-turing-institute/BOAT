@@ -138,7 +138,7 @@ def main(sim_params, sim_output_dir, bench_name=_DEFAULT_BENCH):
     # It seems that gem5 generate_design_sweeps.py needs to be executed in the `gem5-aladdin/sweeps` directory.
     # TODO: check above
     _CWD = os.getcwd()
-   # os.chdir(_GEM5_SWEEPS_PATH)
+    os.chdir(_GEM5_SWEEPS_PATH)
 
     # Preparating the benchmarks 
     # TODO: (currently preparaes all the benchmarks, do we need only specific one, e.g. fft_transpose)
