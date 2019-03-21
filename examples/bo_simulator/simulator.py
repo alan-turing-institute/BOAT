@@ -46,7 +46,7 @@ _GEM5_SWEEPS_BENCH_PATH = os.path.join(_GEM5_SWEEPS_PATH, _GEM5_BENCH_DIR_NAME)
 # Choosing the benchmark
 _DEFAULT_BENCH = "fft_transpose"
 _BENCH_OUT_PARTIAL_PATH = "0"
-_BENCH_OUT_FILE = "/outputs/stdout"
+_BENCH_OUT_FILE = "outputs/stdout"
 
 def create_header_from_template(params, header_path, sim_output_dir, template_path='template.xe'):
     """Prepares a simulator input file based on a template.
@@ -138,7 +138,7 @@ def main(sim_params, sim_output_dir, bench_name=_DEFAULT_BENCH):
     # It seems that gem5 generate_design_sweeps.py needs to be executed in the `gem5-aladdin/sweeps` directory.
     # TODO: check above
     _CWD = os.getcwd()
-    os.chdir(_GEM5_SWEEPS_PATH)
+   # os.chdir(_GEM5_SWEEPS_PATH)
 
     # Preparating the benchmarks 
     # TODO: (currently preparaes all the benchmarks, do we need only specific one, e.g. fft_transpose)
