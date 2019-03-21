@@ -1,5 +1,9 @@
 #include "../../include/boat.hpp"
 
+#include <iostream>
+#include <fstream>
+#include <string>
+
 using namespace std;
 
 using boat::RangeParameter;
@@ -17,33 +21,74 @@ struct AladdinParams{
     cycle_time_(1, 6),
     cache_bandwidth_(4, 17){} // needs to be checked if this is the correct syntax
 
-  RangeParameter<double> cycle_time_;
+  RangeParameter<int> cycle_time_;
   RangeParameter<double> cache_bandwidth_;
 };
 
+// Prepares a string line defining parameters for the simulator
+std::string prep_simulator_params(const AladdinParams &p) {
+  
+  std::string sim_params = "{";
+
+  sim_params += "'cycle_time': " + std::to_string(p.cycle_time_.value()) + ",";
+  sim_params += "'cache_bandwidth': " + std::to_string(p.cache_bandwidth_.value());
+
+  sim_params += "}";
+
+  return sim_params;
+}
+
+// Reads in the result from simulator benchmark run
+double read_simulator_result(const std::string results_file) {
+
+  std::string sim_value;
+  double sim_result = 0.0;
+
+  ifstream myfile(results_file);
+
+  // We expect only one value to be saved in the results file.
+  if (myfile.is_open()) {
+			myfile >> sim_value;
+
+    sim_result = std::stod(sim_value);
+	}
+
+	return sim_result;
+}
+
 // Objective function
-// At the moment this is very ugly implementatio but just to get it working.
+// At the moment this is very ugly implementation but just to get it working.
 // TODO: implement in a more efficient fasion
 double run_simulator(const AladdinParams &p) {
 
-  std::string command = "python ",
-              python_file = "simulator.py";
+  std::string command = "python ";
 
-  double result = 0.0;
+  const std::string python_file = "simulator.py";
+  const std::string results_file = "gem5_sim_res.txt";
 
+  // main python script to run the simulator
+  command += python_file;
+  command += " ";
+  command += '"';
 
-  // create a new input file
+  // set the parameters for the simulator
+  command += prep_simulator_params(p);
 
-  command += "";
+  command += '"';
+  
+  // setting the objective p
+  command += " ";
+  command += "area";
 
-  // run run_simulator
+  // run the simulator
   system(command.c_str());
 
   // retrieve result
+  double result = read_simulator_result(results_file);
+  // std::cout << result << "\n";
 
-  // delete input and output files
-
-
+  // TODO: delete the results file from the simulator.
+  
   return result;
 }
 

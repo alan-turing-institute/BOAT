@@ -4,6 +4,7 @@ A module to prepare header files for the simulated accelerators,
     execute them and retrieve the results.
 """
 
+import argparse
 import os
 import re
 import uuid
@@ -47,6 +48,9 @@ _GEM5_SWEEPS_BENCH_PATH = os.path.join(_GEM5_SWEEPS_PATH, _GEM5_BENCH_DIR_NAME)
 _DEFAULT_BENCH = "fft_transpose"
 _BENCH_OUT_PARTIAL_PATH = "0"
 _BENCH_OUT_FILE = "outputs/stdout"
+
+# Default constants
+_DEFAULT_RESULT_FILE = "gem5_sim_res.txt"
 
 def create_header_from_template(params, header_path, sim_output_dir, template_path='template.xe'):
     """Prepares a simulator input file based on a template.
@@ -124,7 +128,8 @@ def main(sim_params, sim_output_dir, bench_name=_DEFAULT_BENCH):
         bench_name: benchmark to be run with the simulator
 
     Returns:
-        results: a dict mapping simulation results
+        results: a dict mapping simulation results. For example:
+          results = {'area': 1094960.0, 'power': 67.5946, 'cycle': 65029}
     """
 
     # template file
@@ -170,25 +175,42 @@ def main(sim_params, sim_output_dir, bench_name=_DEFAULT_BENCH):
 
 if __name__ == "__main__":
 
-    # temporary parameters for the simulator
-    _PARAMS = {
-        'cache_line_sz': 64,
-        'cache_assoc': 8,
-        'cache_queue_size': 64
-    }
-
-    _SIM_SWEEP_NAME = "{}{}".format("sim_", str(uuid.uuid4()))
+    # Setting up the argument parser
+    parser = argparse.ArgumentParser(description='Run gem5-alladin benchmark')
+    parser.add_argument('sim_params', type=str, 
+                        help='Parameters for the simulator as string representation of a Python dict')
+    parser.add_argument('results_key', type=str, choices=['cycle', 'power', 'area'],
+                        help='Key value of a targeted accelerator specification')
+    parser.add_argument('--sim_name', type=str, default=None,
+                        help='Name of the directory where simulators production runs will be saved')
+    parser.add_argument('--results_file', type=str, default=_DEFAULT_RESULT_FILE,
+                        help='Filename to save the results.')
+                         
+    args = parser.parse_args()
+    
+    _PARAMS = eval(args.sim_params)
 
     # directory to save simulator's production runs
+    if args.sim_name is not None:
+        _SIM_SWEEP_NAME = args.sim_name.strip()
+    else:
+        _SIM_SWEEP_NAME = "{}{}".format("sim_", str(uuid.uuid4()))
+
     _SIM_OUTPUT_DIR = os.path.join(_GEM5_SWEEPS_PATH, _SIM_SWEEP_NAME)
 
     # execute the benchmark with the simulator. If it fails at somepoint 
-    #   return an empty result.
-    # try:
-    results = main(_PARAMS, _SIM_OUTPUT_DIR)
-    # except:
-    #     results = {}
+    #  return an empty result.
+    try:
+        results = main(_PARAMS, _SIM_OUTPUT_DIR)
+    except:
+        results = {}
         
+    # saving the results that BOAT could read in
+    with open(_DEFAULT_RESULT_FILE, "w") as res_file:
+        if not results:
+            res_file.write(str(0.0))
+        else:
+            res_file.write(str(results[args.results_key]))
+            
     # TODO: do we need to clean up _SIM_OUTPUT_DIR ?
-
-    print(results)
+    
