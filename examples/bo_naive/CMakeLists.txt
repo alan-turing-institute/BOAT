@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.5)
 project(bo_naive)
 
-set(CMAKE_CXX_COMPILER g++-8)
+set(CMAKE_CXX_COMPILER g++)
 set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_CXX_FLAGS "-Wall -fexceptions -O3 -fopenmp")

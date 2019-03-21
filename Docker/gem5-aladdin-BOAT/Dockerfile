@@ -2,26 +2,30 @@ FROM xyzsam/gem5-aladdin
 LABEL maintainer="Tomas Lazauskas"
 
 # removing orginal gem5-aladdin repository
-RUN rm -rf gem5-aladdin
+RUN rm -r gem5-aladdin 
 
 # cloning gem5-aladdin-boat develop branch
 RUN git clone https://github.com/alan-turing-institute/gem5-aladdin-boat && \
     cd gem5-aladdin-boat && \
     git fetch && \
     git checkout develop && \
-    git submodule init && \
+    git submodule init &&  \
     git submodule update
 
 # updating the enviromental parameter
 ENV ALADDIN_HOME /workspace/gem5-aladdin-boat/src/aladdin
 
 # Install BOAT dependencies.
-RUN apt-get install -y \
-      g++ 
-    #   \
-    #   libblas-dev \
-    #   liblapack-dev \
+#   libboost-all-dev probably is an overkill but could be changed later.
+RUN apt-get update; apt-get install -y \
+      g++ \
+      gfortran \
+      gcc \
+      nano
 
+RUN apt-get update; apt-get install -y \
+      libblas-dev \
+      libboost-all-dev 
 
 # installing dependencies: eigen
 WORKDIR "/var/tmp"
@@ -43,26 +47,21 @@ RUN mkdir build
 WORKDIR "/var/tmp/nlopt/build"
 RUN cmake ..; make; make install
 
+# checking out BOAT
 WORKDIR "/workspace/gem5-aladdin-boat/BOAT"
+RUN cd .. && \
+    git submodule update --recursive --remote
+
+# building BOAT
 RUN mkdir build
 WORKDIR "/workspace/gem5-aladdin-boat/BOAT/build/"
+RUN ls -lrt
 RUN cmake ../src; make
 
+RUN pip install numpy
+RUN pip install pyparsing==2.1.10
 
-# WORKDIR "/workspace/gem5-aladdin/BOAT"
-# RUN git checkout bo_simulator 
+ENV BOAT_HOME /workspace/gem5-aladdin/BOAT
 
-# # RUN git clone --branch chk_depend https://github.com/alan-turing-institute/BOAT.git
+WORKDIR /workspace
 
-
-# ### get wget git etc
-# # RUN apt-get update; apt-get -y install 
-# # RUN apt-get update; apt-get -y install 
-# # RUN apt-get update; apt-get -y install g++
-# # RUN apt-get update; apt-get -y install libblas-dev
-# # RUN apt-get update; apt-get -y install liblapack-dev
-# # RUN apt-get update; apt-get -y install libboost-all-dev
-
-# ENV BOAT_HOME /workspace/gem5-aladdin/BOAT
-
-# WORKDIR /workspace
