@@ -45,8 +45,8 @@ _GEM5_SWEEPS_BENCH_PATH = os.path.join(_GEM5_SWEEPS_PATH, _GEM5_BENCH_DIR_NAME)
 
 # Choosing the benchmark
 _DEFAULT_BENCH = "fft_transpose"
-_BENCH_OUT_PARTIAL_PATH = "0/outputs"
-_BENCH_OUT_FILE = "stdout"
+_BENCH_OUT_PARTIAL_PATH = "0"
+_BENCH_OUT_FILE = "/outputs/stdout"
 
 def create_header_from_template(params, header_path, sim_output_dir, template_path='template.xe'):
     """Prepares a simulator input file based on a template.
@@ -124,7 +124,7 @@ def main(sim_params, sim_output_dir, bench_name=_DEFAULT_BENCH):
         bench_name: benchmark to be run with the simulator
 
     Returns:
-        results: 
+        results: a dict mapping simulation results
     """
 
     # template file
@@ -161,15 +161,11 @@ def main(sim_params, sim_output_dir, bench_name=_DEFAULT_BENCH):
 
     os.chdir(_CWD)
     
-    # TODO: change the results directory to the actual directory
+    # Collecting the results from the simululation run
     results_file_path = os.path.join(bench_path, _BENCH_OUT_FILE)
 
-    # Collecting the results from the simululation run
-    try:
-        results = collect_result(results_file_path)
-    except:
-        results = {}
-
+    results = collect_result(results_file_path)
+ 
     return results
 
 if __name__ == "__main__":
@@ -186,8 +182,13 @@ if __name__ == "__main__":
     # directory to save simulator's production runs
     _SIM_OUTPUT_DIR = os.path.join(_GEM5_SWEEPS_PATH, _SIM_SWEEP_NAME)
 
+    # execute the benchmark with the simulator. If it fails at somepoint 
+    #   return an empty result.
+    # try:
     results = main(_PARAMS, _SIM_OUTPUT_DIR)
-
+    # except:
+    #     results = {}
+        
     # TODO: do we need to clean up _SIM_OUTPUT_DIR ?
 
     print(results)
