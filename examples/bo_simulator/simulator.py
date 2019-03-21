@@ -43,7 +43,7 @@ _GEM5_SWEEPS_PATH = os.path.join(_GEM5_PATH, _GEM5_SWEEPS_DIR_NAME)
 _GEM5_SWEEPS_DESIGN_PY_PATH = os.path.join(_GEM5_SWEEPS_PATH, _GEM5_SWEEPS_DESIGN_PY)
 _GEM5_SWEEPS_BENCH_PATH = os.path.join(_GEM5_SWEEPS_PATH, _GEM5_BENCH_DIR_NAME)
 
-# Choosing  the benchmark
+# Choosing the benchmark
 _DEFAULT_BENCH = "fft_transpose"
 _BENCH_OUT_PARTIAL_PATH = "0/outputs"
 _BENCH_OUT_FILE = "stdout"
@@ -153,7 +153,7 @@ def main(sim_params, sim_output_dir, bench_name=_DEFAULT_BENCH):
         os.remove(header_file_path)
 
     # Running the bechmark with the simulator
-    bench_path = os.path.join(_GEM5_SWEEPS_BENCH_PATH, bench_name, _BENCH_OUT_PARTIAL_PATH)
+    bench_path = os.path.join(sim_output_dir, bench_name, _BENCH_OUT_PARTIAL_PATH)
     os.chdir(bench_path)
 
     # Performing the benchmark
