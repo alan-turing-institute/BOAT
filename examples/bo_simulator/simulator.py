@@ -5,9 +5,8 @@ A module to prepare header files for the simulated accelerators,
 """
 
 import os
+import re
 import uuid
-# import itertools
-# import numpy as np
 
 # A list of available accelerator parameters
 _AVAILABLE_PARAMS = [
@@ -32,6 +31,22 @@ _AVAILABLE_PARAMS = [
     'ready_mode from',
     'ignore_cache_flush'
 ]
+
+# get the paths to aladdin, gem5 and other submodules
+_GEM5_PATH = os.path.abspath(os.path.join(os.environ['ALADDIN_HOME'], '..', '..'))
+
+_GEM5_BENCH_DIR_NAME = 'benchmarks'
+_GEM5_SWEEPS_DIR_NAME = 'sweeps'
+_GEM5_SWEEPS_DESIGN_PY = 'generate_design_sweeps.py'
+
+_GEM5_SWEEPS_PATH = os.path.join(_GEM5_PATH, _GEM5_SWEEPS_DIR_NAME)
+_GEM5_SWEEPS_DESIGN_PY_PATH = os.path.join(_GEM5_SWEEPS_PATH, _GEM5_SWEEPS_DESIGN_PY)
+_GEM5_SWEEPS_BENCH_PATH = os.path.join(_GEM5_SWEEPS_PATH, _GEM5_BENCH_DIR_NAME)
+
+# Choosing  the benchmark
+_DEFAULT_BENCH = "fft_transpose"
+_BENCH_OUT_PARTIAL_PATH = "0/outputs"
+_BENCH_OUT_FILE = "stdout"
 
 def create_header_from_template(params, header_path, sim_output_dir, template_path='template.xe'):
     """Prepares a simulator input file based on a template.
@@ -66,34 +81,58 @@ def create_header_from_template(params, header_path, sim_output_dir, template_pa
     with open(header_path, 'w') as ouput_file:
         ouput_file.write(out_src)
 
-if __name__ == "__main__":
+def collect_result(results_file_path):
+    """Collects results from a simululation run
 
-    # temporary parameters
-    _PARAMS = {
-        'cache_line_sz': 64,
-        'cache_assoc': 8,
-        'cache_queue_size': 64
-    }
+    Args:
+        results_file_path: full path to the simulation results file
 
-    _GEM5_BENCH_DIR_NAME = 'benchmarks'
-    _GEM5_SWEEPS_DIR_NAME = 'sweeps'
-    _GEM5_SWEEPS_DESIGN_PY = 'generate_design_sweeps.py'
+    Returns:
+        results: a dict mapping simulation results
+    """
 
-    # get the paths to aladdin and its submodules
-    _GEM5_PATH = os.path.join(os.environ['ALADDIN_HOME'], '..', '..')
+    results = {}
 
-    _GEM5_SWEEPS_PATH = os.path.join(_GEM5_PATH, _GEM5_SWEEPS_DIR_NAME)
-    _GEM5_SWEEPS_DESIGN_PY_PATH = os.path.join(_GEM5_SWEEPS_PATH, _GEM5_SWEEPS_DESIGN_PY)
-    _GEM5_SWEEPS_BENCH_PATH = os.path.join(_GEM5_SWEEPS_PATH, _GEM5_BENCH_DIR_NAME)
+    cycle = [re.findall(r'Cycle : (.*) cycles', line) for line in open(results_file_path)]
+    cycle = [c for l in cycle for c in l]
+    cycle = int(cycle[0])
+
+    results['cycle'] = cycle
+
+    power = [re.findall(r'Avg Power: (.*) mW', line) for line in open(results_file_path)]
+    power = [p for l in power for p in l]
+
+    power = float(power[0])
+
+    results['power'] = power
+
+    area = [re.findall(r'Total Area: (.*) uM', line) for line in open(results_file_path)]
+    area = [a for l in area for a in l]
+
+    area = float(area[0])
+
+    results['area'] = area
+    
+    return results
+
+def main(sim_params, sim_output_dir, bench_name=_DEFAULT_BENCH):
+    """Collects results from a simululation run
+
+    Args:
+        sim_params: parameters for the simulator
+        sim_output_dir: directory to save simulator's production runs
+        bench_name: benchmark to be run with the simulator
+
+    Returns:
+        results: 
+    """
 
     # template file
-    _HEADER_FILE_NAME = str(uuid.uuid4())
-    _HEADER_PATH = os.path.join(_GEM5_SWEEPS_BENCH_PATH, _HEADER_FILE_NAME)
-
-    _SIM_OUTPUT_DIR = os.path.join(_GEM5_SWEEPS_PATH, 'tla_temp')
+    header_file_name = str(uuid.uuid4())
+    header_file_path = os.path.join(_GEM5_SWEEPS_BENCH_PATH, header_file_name)
 
     # Preparing input input file for the simulator
-    create_header_from_template(_PARAMS, _HEADER_PATH, _SIM_OUTPUT_DIR)
+    create_header_from_template(sim_params, header_file_path, sim_output_dir)
 
     # Generating design sweeps using the script provided with gem5
     # It seems that gem5 generate_design_sweeps.py needs to be executed in the `gem5-aladdin/sweeps` directory.
@@ -101,22 +140,54 @@ if __name__ == "__main__":
     _CWD = os.getcwd()
     os.chdir(_GEM5_SWEEPS_PATH)
 
+    # Preparating the benchmarks 
+    # TODO: (currently preparaes all the benchmarks, do we need only specific one, e.g. fft_transpose)
     # TODO: python2 needs to be python?
     os.system('python2 %s %s' % (_GEM5_SWEEPS_DESIGN_PY_PATH, 
-                                 os.path.join(_GEM5_BENCH_DIR_NAME, _HEADER_FILE_NAME)))
+                                 os.path.join(_GEM5_BENCH_DIR_NAME, header_file_name)))
 
     os.chdir(_CWD)
 
-    # removing the temporary header file
-    if os.path.exists(_HEADER_PATH):
-        os.remove(_HEADER_PATH)
+    # # removing the temporary header file
+    if os.path.exists(header_file_path):
+        os.remove(header_file_path)
 
-    # Executing the simulator
+    # Running the bechmark with the simulator
+    bench_path = os.path.join(_GEM5_SWEEPS_BENCH_PATH, bench_name, _BENCH_OUT_PARTIAL_PATH)
+    os.chdir(bench_path)
 
+    # Performing the benchmark
+    os.system('sh run.sh')
 
+    os.chdir(_CWD)
+    
+    # TODO: change the results directory to the actual directory
+    results_file_path = os.path.join(bench_path, _BENCH_OUT_FILE)
 
-    # Collecting results
+    # Collecting the results from the simululation run
+    try:
+        results = collect_result(results_file_path)
+    except:
+        results = {}
 
+    return results
 
+if __name__ == "__main__":
 
-    print('Finished.')
+    # temporary parameters for the simulator
+    _PARAMS = {
+        'cache_line_sz': 64,
+        'cache_assoc': 8,
+        'cache_queue_size': 64
+    }
+
+    _SIM_SWEEP_NAME = "{}{}".format("sim_", str(uuid.uuid4()))
+
+    # directory to save simulator's production runs
+    _SIM_OUTPUT_DIR = os.path.join(_GEM5_SWEEPS_PATH, _SIM_SWEEP_NAME)
+
+    results = main(_PARAMS, _SIM_OUTPUT_DIR)
+
+    # TODO: do we need to clean up _SIM_OUTPUT_DIR ?
+
+    print(results)

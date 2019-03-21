@@ -5,8 +5,8 @@ begin Gem5DesignSweep single
 
 use benchmarks.machsuite.*
 
-#generate configs
-#generate trace
+generate configs
+generate trace
 #generate gem5_binary
 
 # Set parameters.
