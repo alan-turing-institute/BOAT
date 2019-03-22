@@ -32,7 +32,7 @@ RUN cmake ..; make; make install
 # installing BOAT
 WORKDIR "/"
 
-RUN git clone --branch chk_depend https://github.com/alan-turing-institute/BOAT.git
+RUN git clone --branch bo_simulator https://github.com/alan-turing-institute/BOAT.git
 RUN mkdir BOAT/build
 WORKDIR "/BOAT/build/"
 RUN cmake ../src; make
