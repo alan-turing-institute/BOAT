@@ -6,9 +6,6 @@ else
 n_branch = $(branch)
 endif
 
-all:
-	@echo $(n_branch)
-
 pull:
 	docker pull turingboat/boat:$(n_branch)
 
