@@ -130,10 +130,11 @@ struct Param : public SemiParametricModel<Param> {
     p_.stdev(uniform_real_distribution<>(0.0, 200.0)(generator));
 
     // the length scale of each dimension of the input
-    p_.linear_scales({uniform_real_distribution<>(1.0, 6.0)(generator),
-                     uniform_real_distribution<>(0.0, 1.0)(generator)}); // change for the pipelining_
+    p_.linear_scales({uniform_real_distribution<>(1.0, 6.0)(generator)}); // change for the pipelining_
 
 
+
+    // , uniform_real_distribution<>(0.0, 1.0)(generator)
     // ,
     //                  uniform_real_distribution<>(0.0, 15.0)(generator)
 
