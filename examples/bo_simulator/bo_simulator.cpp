@@ -16,39 +16,21 @@ using boat::NLOpt;
 using boat::BayesOpt;
 using boat::generator;
 
+// Arrays of actual values for categorical parameters
+const int cache_size_values[] = {16384, 32768, 65536, 131072};
+
 // Parameters for the model
 struct AladdinParams{
   AladdinParams() :
+    cache_size_(0, 4), // Categorical parameter
     cycle_time_(1, 6),
-    pipelining_(std::vector<int> {0, 1}){} // needs to be checked if this is the correct syntax
-    // cache_bandwidth_(4, 17)
+    pipelining_(0, 2),
+    tlb_hit_latency_(1, 5) {} 
 
+  RangeParameter<int> cache_size_;
   RangeParameter<int> cycle_time_;
-  CategoricalParameter<int> pipelining_;
-  
-  
-  // RangeParameter<double> cache_bandwidth_;
-
-
-	// 'cycle_time': range(1, 6),
-	// 'pipelining': [0, 1],
-
-	// 'enable_l2': [0, 1],
-	// 'pipelined_dma': [0, 1],
-	// 'tlb_entries': range(17),
-	// 'tlb_hit_latency': range(1, 5),
-	// 'tlb_miss_latency': range(10, 21),
-	// 'tlb_page_size': [4096, 8192],
-	// 'tlb_assoc': [4, 8, 16],
-	// 'tlb_bandwidth': [1, 2],
-	// 'tlb_max_outstanding_walks': [4, 8],
-  // 'cache_size': [16384, 32768, 65536, 131072],
-  // 'cache_assoc': [1, 2, 4, 8, 16],
-  // 'cache_hit_latency': range(1, 5),
-  // 'cache_line_sz': [16, 32, 64],
-  // 'cache_queue_size': [32, 64, 128],
-  // 'cache_bandwidth': range(4, 17)
-
+  RangeParameter<int> pipelining_;
+  RangeParameter<int> tlb_hit_latency_;
 };
 
 // Prepares a string line defining parameters for the simulator
@@ -58,8 +40,10 @@ std::string prep_simulator_params(const AladdinParams &p) {
 
   sim_params += "'cycle_time': " + std::to_string(p.cycle_time_.value()) + ",";
   sim_params += "'pipelining': " + std::to_string(p.pipelining_.value()) + ",";
+  sim_params += "'tlb hit latency': " + std::to_string(p.tlb_hit_latency_.value()) + ",";
 
-  // sim_params += "'cache_bandwidth': " + std::to_string(p.cache_bandwidth_.value());
+  // getting the categorical parameter values
+  sim_params += "'cache_size': " + std::to_string(cache_size_values[p.cache_size_.value()]) + ",";
 
   sim_params += "}";
 
@@ -108,12 +92,13 @@ double run_simulator(const AladdinParams &p) {
   command += " ";
   command += "area";
 
+  std::cout << command << "\n";
+
   // run the simulator
   system(command.c_str());
 
   // retrieve result
   double result = read_simulator_result(results_file);
-  // std::cout << result << "\n";
 
   // TODO: delete the results file from the simulator.
   
@@ -130,15 +115,13 @@ struct Param : public SemiParametricModel<Param> {
     p_.stdev(uniform_real_distribution<>(0.0, 200.0)(generator));
 
     // the length scale of each dimension of the input
-    p_.linear_scales({uniform_real_distribution<>(1.0, 6.0)(generator)}); // change for the pipelining_
+    p_.linear_scales({
+      uniform_real_distribution<>(0.0, 4.0)(generator), // cache_size (categorical)
+      uniform_real_distribution<>(1.0, 6.0)(generator), // cycle_time
+      uniform_real_distribution<>(0.0, 2.0)(generator), // pipelining
+      uniform_real_distribution<>(1.0, 5.0)(generator)  // tbl_hit_latency
+      }); 
 
-
-
-    // , uniform_real_distribution<>(0.0, 1.0)(generator)
-    // ,
-    //                  uniform_real_distribution<>(0.0, 15.0)(generator)
-
-    // for a categorical params needs to be investigated
     set_params(p_);
   }
 
@@ -154,8 +137,11 @@ struct FullModel : public DAGModel<FullModel> {
 
   // registers objective under graph
   void model(const AladdinParams& p) {
-    output("objective", eng_, p.cycle_time_.value(), p.pipelining_.value());
-    // , p.cache_bandwidth_.value()
+    output("objective", eng_, 
+      p.cache_size_.value(),
+      p.cycle_time_.value(), 
+      p.pipelining_.value(), 
+      p.tlb_hit_latency_.value());
   }
 
   void print() {
@@ -163,6 +149,7 @@ struct FullModel : public DAGModel<FullModel> {
     PR(AVG_PROP(eng_, p_.stdev()));
     PR(AVG_PROP(eng_, p_.linear_scales()[0]));
     PR(AVG_PROP(eng_, p_.linear_scales()[1]));
+
   }
   ProbEngine<Param> eng_;
 };
@@ -170,12 +157,12 @@ struct FullModel : public DAGModel<FullModel> {
 // what is the next point we should test
 // incumbent - best current example
 void maximize_ei(FullModel& m, AladdinParams& p, double incumbent) {
-  NLOpt<> opt(p.cycle_time_);
+  NLOpt<> opt(
+    p.cache_size_, 
+    p.cycle_time_, 
+    p.pipelining_, 
+    p.tlb_hit_latency_);
 
-  // , p.pipelining_
-  
-  // , p.cache_bandwidth_
-  
   // finds high uncertainty points
   // r - expected improvement
   auto obj = [&]() {
@@ -205,9 +192,12 @@ void bo_naive_optim() {
 
     res["objective"] = run_simulator(p);
 
-    PR(p.cycle_time_.value(), p.pipelining_.value(), res["objective"]);
-
-    // , p.cache_bandwidth_.value()
+    PR(
+      p.cache_size_.value(),
+      p.cycle_time_.value(), 
+      p.pipelining_.value(), 
+      p.tlb_hit_latency_.value(), 
+      res["objective"]);
 
     return res;
   };

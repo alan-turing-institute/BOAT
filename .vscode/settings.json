@@ -69,6 +69,7 @@
         "*.tcc": "cpp",
         "array": "cpp",
         "deque": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "core": "cpp"
     }
 }
