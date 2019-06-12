@@ -8,6 +8,7 @@ using namespace std;
 
 using boat::RangeParameter;
 using boat::CategoricalParameter;
+
 using boat::GPParams;
 using boat::ProbEngine;
 using boat::SemiParametricModel;
@@ -35,7 +36,7 @@ struct AladdinParams{
 
 // Prepares a string line defining parameters for the simulator
 std::string prep_simulator_params(const AladdinParams &p) {
-  
+
   std::string sim_params = "{";
 
   sim_params += "'cycle_time': " + std::to_string(p.cycle_time_.value()) + ",";
@@ -73,6 +74,8 @@ double read_simulator_result(const std::string results_file) {
 // TODO: implement in a more efficient fasion
 double run_simulator(const AladdinParams &p) {
 
+  return 0.0;
+
   std::string command = "python ";
 
   const std::string python_file = "simulator.py";
@@ -87,7 +90,7 @@ double run_simulator(const AladdinParams &p) {
   command += prep_simulator_params(p);
 
   command += '"';
-  
+
   // setting the objective p
   command += " ";
   command += "area";
@@ -101,7 +104,7 @@ double run_simulator(const AladdinParams &p) {
   double result = read_simulator_result(results_file);
 
   // TODO: delete the results file from the simulator.
-  
+
   return result;
 }
 
@@ -149,7 +152,6 @@ struct FullModel : public DAGModel<FullModel> {
     PR(AVG_PROP(eng_, p_.stdev()));
     PR(AVG_PROP(eng_, p_.linear_scales()[0]));
     PR(AVG_PROP(eng_, p_.linear_scales()[1]));
-
   }
   ProbEngine<Param> eng_;
 };
@@ -213,7 +215,7 @@ void bo_naive_optim() {
   opt.set_learning_function(learn);
 
   opt.set_minimizing();
-  opt.set_max_num_iterations(5);
+  opt.set_max_num_iterations(25);
   opt.run_optimization();
 }
 
