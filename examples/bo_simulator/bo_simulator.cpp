@@ -74,8 +74,6 @@ double read_simulator_result(const std::string results_file) {
 // TODO: implement in a more efficient fasion
 double run_simulator(const AladdinParams &p) {
 
-  return 0.0;
-
   std::string command = "python ";
 
   const std::string python_file = "simulator.py";
