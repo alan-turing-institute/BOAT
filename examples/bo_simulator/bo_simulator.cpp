@@ -91,7 +91,7 @@ double run_simulator(const AladdinParams &p) {
 
   // setting the objective p
   command += " ";
-  command += "area";
+  command += "P1";
 
   std::cout << command << "\n";
 
@@ -109,11 +109,11 @@ double run_simulator(const AladdinParams &p) {
 /// Naive way of optimizing it, model with simple GP prior
 struct Param : public SemiParametricModel<Param> {
   Param() {
-    p_.default_noise(0.0);
+    p_.default_noise(0.01);
 
     // Ranges require updating with more realistic values from the results
-    p_.mean(uniform_real_distribution<>(0.0, 100.0)(generator));
-    p_.stdev(uniform_real_distribution<>(0.0, 200.0)(generator));
+    p_.mean(uniform_real_distribution<>(0.0, 0.5)(generator));
+    p_.stdev(uniform_real_distribution<>(0.0, 0.5)(generator));
 
     // the length scale of each dimension of the input
     p_.linear_scales({
@@ -212,8 +212,8 @@ void bo_naive_optim() {
   opt.set_objective_function(util);
   opt.set_learning_function(learn);
 
-  opt.set_minimizing();
-  opt.set_max_num_iterations(25);
+  opt.set_maximizing();
+  opt.set_max_num_iterations(200);
   opt.run_optimization();
 }
 
