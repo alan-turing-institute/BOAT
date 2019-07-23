@@ -41,7 +41,7 @@ std::string prep_simulator_params(const AladdinParams &p) {
 
   sim_params += "'cycle_time': " + std::to_string(p.cycle_time_.value()) + ",";
   sim_params += "'pipelining': " + std::to_string(p.pipelining_.value()) + ",";
-  sim_params += "'tlb hit latency': " + std::to_string(p.tlb_hit_latency_.value()) + ",";
+  sim_params += "'tlb_hit_latency': " + std::to_string(p.tlb_hit_latency_.value()) + ",";
 
   // getting the categorical parameter values
   sim_params += "'cache_size': " + std::to_string(cache_size_values[p.cache_size_.value()]) + ",";
@@ -112,8 +112,8 @@ struct Param : public SemiParametricModel<Param> {
     p_.default_noise(0.01);
 
     // Ranges require updating with more realistic values from the results
-    p_.mean(uniform_real_distribution<>(0.0, 0.5)(generator));
-    p_.stdev(uniform_real_distribution<>(0.0, 0.5)(generator));
+    p_.mean(uniform_real_distribution<>(0.0, 5.0)(generator));
+    p_.stdev(uniform_real_distribution<>(0.0, 2.5)(generator));
 
     // the length scale of each dimension of the input
     p_.linear_scales({
@@ -202,7 +202,6 @@ void bo_naive_optim() {
     return res;
   };
 
-  // takes the result
   auto learn = [&](const unordered_map<string, double>& r){
     m.observe(r, p);
   };

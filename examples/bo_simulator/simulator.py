@@ -59,9 +59,9 @@ _TARGET_FUNC_COEF = {
     _CONST_P5: {_CONST_C1: 0.01, _CONST_C2: 0.99}}
     
 ### fft_transpose 1000 random search results
-_CONST_MAX_AREA = 2515230
-_CONST_MAX_CYCLE = 62966
-_CONST_MAX_POWER = 225.118
+_CONST_MAX_AREA = float(2515230.0)
+_CONST_MAX_CYCLE = float(62966.0)
+_CONST_MAX_POWER = float(225.118)
 
 # get the paths to aladdin, gem5 and other submodules
 _GEM5_PATH = os.path.abspath(os.path.join(os.environ['ALADDIN_HOME'], '..', '..'))
@@ -130,7 +130,7 @@ def __collect_result(results_file_path):
 
     cycle = [re.findall(r'Cycle : (.*) cycles', line) for line in open(results_file_path)]
     cycle = [c for l in cycle for c in l]
-    cycle = int(cycle[0])
+    cycle = float(cycle[0])
 
     results['cycle'] = cycle
 
@@ -235,7 +235,7 @@ def __get_target_value(results, target_type):
         c2 = _TARGET_FUNC_COEF[target_type][_CONST_C2]
 
         value = c1 * (cycle_norm / area_norm) + c2 * (power_norm / area_norm)
-
+        
     else:
         value = 0.0
         raise ValueError('Unrecognised target_type')
