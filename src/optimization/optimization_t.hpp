@@ -52,6 +52,7 @@ double IterationResult<ObjectiveResult, InstantiationResult>::utility() const {
 template <class ObjectiveResult, class... InstantiationResult>
 ObjectiveResult
 Optimization<ObjectiveResult, InstantiationResult...>::run_optimization() {
+  std::cout << "Optimization<ObjectiveResult, InstantiationResult...>::run_optimization()" << std::endl;
   assert(ParameterInstance::current_instance != nullptr);
   ParameterInstance* optimization_instance =
       ParameterInstance::current_instance;
@@ -147,6 +148,9 @@ void BayesOpt<ObjectiveResult>::set_utility_permanent(bool utility_permanent) {
 
 template <class ObjectiveResult>
 void BayesOpt<ObjectiveResult>::iteration_internal(ParameterInstance* instance) {
+  std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
+  std::cout << "BayesOpt<ObjectiveResult>::iteration_internal(ParameterInstance* instance)" << std::endl;
+
   // Perform the iteration
   instantiation_function_();
 
@@ -167,6 +171,7 @@ void BayesOpt<ObjectiveResult>::iteration_internal(ParameterInstance* instance) 
   // If this isn't the last iteration, we learn
 
   if (learn_from_last_ || this->has_more_iterations()) {
+    std::cout << "-- Calling learning_function_" << std::endl;
     learning_function_(this->get_all_results());
   }
 }

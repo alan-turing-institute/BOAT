@@ -197,6 +197,8 @@ double GP::observe_i(const std::vector<double>& x_new, double y_new,
   GaussianDistrib distrib = predict_distrib(x_new);
   double var = distrib.var_ + noise_var_new;
 
+  std::cout << "GP::observe_i(const std::vector<double>& x_new, double y_new, double noise_var_new)" << std::endl;
+
   // Debug
   if(var < 0.0){
     //PR(observed_x_.size(), y_new, distrib.first, distrib.var_, noise);
@@ -239,11 +241,17 @@ double GP::observe_i(const std::vector<double>& x_new, double y_new,
 }
 
 double GP::observe(const std::vector<double>& x_new, double y_new){
+
+  std::cout << "GP::observe(const std::vector<double>& x_new, double y_new)" << std::endl;
+
   return observe(x_new, y_new, params_.default_noise());
 }
 
 double GP::observe(const std::vector<double>& x_new, double y_new,
                            double noise){
+
+  std::cout << "GP::observe(const std::vector<double>& x_new, double y_new, double noise)" << std::endl;
+
   return observe_i(x_new, y_new, noise * noise);
 }
 
@@ -320,6 +328,8 @@ GaussianDistrib TreedGPS::predict_distrib(const std::vector<double>& x_new) cons
 }
 
 double TreedGPS::observe(const std::vector<double>& x_new, double y_new) {
+  std::cout << "TreedGPS::observe(const std::vector<double>& x_new, double y_new) " << std::endl;
+
   check_thresh();
   if(gp_) {
     return gp_->observe(x_new, y_new);
@@ -335,14 +345,19 @@ double TreedGPS::observe(const std::vector<double>& x_new, double y_new) {
 
 double TreedGPS::observe(const std::vector<double>& x_new,
                          double y_new, double noise) {
+
+  std::cout << "TreedGPS::observe(const std::vector<double>& x_new, double y_new, double noise) " << std::endl;
   check_thresh();
   if(gp_) {
+    std::cout << "gp_" << std::endl;
     return gp_->observe(x_new, y_new, noise);
   } else {
     assert(right_ && left_);
     if(side(x_new)) {
+      std::cout << "right_" << std::endl;
       return right_->observe(x_new, y_new, noise);
     } else {
+      std::cout << "left_" << std::endl;
       return left_->observe(x_new, y_new, noise);
     }
   }

@@ -82,7 +82,7 @@ void maximize_ei(FullModel& m, BHParams& p, double incumbent) {
     return r;
   };
   opt.set_objective_function(obj);
-  opt.set_max_num_iterations(10000);
+  opt.set_max_num_iterations(100);
   opt.set_maximizing();
   opt.run_optimization();
 }
@@ -130,8 +130,8 @@ struct SecondTermModel : public SemiParametricModel<SecondTermModel> {
 
 struct BHModel : public DAGModel<BHModel> {
   BHModel() {
-    first_.set_num_particles(100000);
-    second_.set_num_particles(100000);
+    first_.set_num_particles(10);
+    second_.set_num_particles(10);
   }
   void model(const BHParams& p) {
     double ft = output("first", first_, p.x1_.value());
@@ -182,7 +182,7 @@ void bo_struct_optim() {
   opt.set_objective_function(util);
   opt.set_learning_function(learn);
   opt.set_minimizing();
-  opt.set_max_num_iterations(5);
+  opt.set_max_num_iterations(10);
   opt.run_optimization();
 }
 

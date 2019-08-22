@@ -167,7 +167,7 @@ struct FullModel : public DAGModel<FullModel> {
 
   // for a semi parametric model
   FullModel(){
-    eng_.set_num_particles(10000);
+    eng_.set_num_particles(1000);
   }
 
   // registers objective under graph
@@ -205,12 +205,11 @@ void maximize_ei(FullModel& m, AladdinParams& p, double incumbent) {
   // r - expected improvement
   auto obj = [&]() {
     double r = m.expected_improvement("objective", incumbent, p);
-    std::cout << "expected_improvement: " << r << std::endl;
     return r;
   };
 
   opt.set_objective_function(obj);
-  opt.set_max_num_iterations(1000);
+  opt.set_max_num_iterations(100);
   opt.set_maximizing();
   opt.run_optimization();
 }
@@ -220,7 +219,7 @@ void bo_naive_optim() {
   results_header();
 
   FullModel m;
-  m.set_num_particles(10000);
+  m.set_num_particles(1000);
 
   AladdinParams p;
   BayesOpt<unordered_map<string, double> > opt;

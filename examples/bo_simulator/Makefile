@@ -6,5 +6,8 @@ LIBS= -lboat -lpthread -lblas -lnlopt -lm -lboost_serialization -lboost_system -
 bo_simulator: bo_simulator.cpp
 	$(CC) -o bo_simulator $(CFLAGS) -I$(BOAT_DIR)/include/ bo_simulator.cpp -L$(BOAT_DIR)/build $(LIBS)
 
+bo_simulator_cat: bo_simulator_cat.cpp
+	$(CC) -o bo_simulator_cat $(CFLAGS) -I$(BOAT_DIR)/include/ bo_simulator_cat.cpp -L$(BOAT_DIR)/build $(LIBS)
+
 clean:
-	rm -f bo_simulator
+	rm -f bo_simulator bo_simulator_cat

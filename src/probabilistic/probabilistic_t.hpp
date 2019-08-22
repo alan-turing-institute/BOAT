@@ -171,12 +171,14 @@ ProbEngine<Particle>::get_random_selection(int new_np) const {
 template <class Particle>
 template <class... Args>
 void ProbEngine<Particle>::observe(const Args&... args) {
+  std::cout << "ProbEngine<Particle>::observe" << std::endl;
   observe_i(false, args...);
 }
 
 template <class Particle>
 template <class... Args>
 void ProbEngine<Particle>::observe_deterministic(const Args&... args) {
+  std::cout << "ProbEngine<Particle>::observe_deterministic" << std::endl;
   observe_i(true, args...);
 }
 
@@ -184,6 +186,9 @@ template <class Particle>
 template <class... Args>
 void ProbEngine<Particle>::observe_i(bool deterministic, const Args&... args) {
   check_constructed();
+
+  std::cout << "ProbEngine<Particle>::observe_i" << std::endl;
+
   particles_for_average_.clear();
   if (!deterministic) {
     check_ess();
@@ -424,9 +429,24 @@ template <class Child>
 template <class... Args>
 double SemiParametricModel<Child>::observe(double result,
                                              const Args&... args) const {
+  std::cout << "SemiParametricModel<Child>::observe" << std::endl;
   double p = crtp_this()->parametric(args...);
   double n = crtp_this()->parametric_noise(args...);
   std::vector<double> v = crtp_this()->to_vec(args...);
+
+  std::cout << "Before gp_.observe: " << std::endl;
+
+  std::cout << "   v: ";
+
+  for (int i = 0; i < v.size(); i++) {
+		std::cout << v.at(i) << ' ';
+	}
+
+  std::cout << std::endl;
+  std::cout << "   result: " << result << std::endl;
+  std::cout << "   p: " << p << std::endl;
+  std::cout << "   n: " << n << std::endl;
+
   return gp_.observe(v, result - p, n);
 }
 
@@ -461,6 +481,9 @@ void DAGModel<Child>::observe(
   check_unset();
   observe_ = true;
   measurements_ = &measurements;
+
+  std::cout << "DAGModel<Child>::observe" << std::endl;
+
   crtp_this()->model(args...);
   assert(measurements.size() == observed_measurements_.size());
   observed_measurements_.clear();
@@ -593,16 +616,22 @@ double DAGModel<Child>::output(const std::string& name,
                                ProbEngine<Particle>& eng,
                                const Args&... args){
   if(test_pass_) {
+    std::cout << "double DAGModel<Child>::output eng " << name << " output_test_pass" << std::endl;
     return output_test_pass(name, eng, args...);
   } else if(past_target_){
+    std::cout << "double DAGModel<Child>::output eng " << name << " output_past_target" << std::endl;
     return output_past_target(name, eng, args...);
   } else if (observe_) {
+    std::cout << "double DAGModel<Child>::output eng " << name << " output_observe" << std::endl;
     return output_observe(name, eng, args...);
   } else if(ei_) {
+    //std::cout << "double DAGModel<Child>::output eng " << name << " output_ei" << std::endl;
     return output_ei(name, eng, args...);
   } else if(predict_) {
+    // std::cout << "double DAGModel<Child>::output eng " << name << " output_predict" << std::endl;
     return output_predict(name, eng, args...);
   } else if (is_sample_) {
+    // std::cout << "double DAGModel<Child>::output eng " << name << " output_sample_predict" << std::endl;
     return output_sample_predict(name, eng, args...);
   }
   assert(false);
@@ -611,6 +640,9 @@ double DAGModel<Child>::output(const std::string& name,
 template <class Child>
 double DAGModel<Child>::output(const std::string& name,
                                double val){
+
+  std::cout << "double DAGModel<Child>::output val" << std::endl;
+
   if(test_pass_) {
     return output_test_pass(name, val);
   } else if(past_target_){
@@ -822,6 +854,7 @@ double DAGModel<Child>::output_observe(const std::string& name,
   assert(it != measurements_->end());
   assert(observed_measurements_.count(name) == 0);
   observed_measurements_.insert(name);
+  std::cout << "DAGModel<Child>::output_observe" << std::endl;
   eng.observe_deterministic(it->second, args...);
   return it->second;
 }
